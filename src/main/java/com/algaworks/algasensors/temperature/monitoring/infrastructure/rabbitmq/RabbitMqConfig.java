@@ -8,10 +8,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitMqConfig {
 
     public static final String QUEUE_PROCESS_TEMPERATURE = "temperature-monitoring.process-temperature.v1.q";
+    public static final String DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE = "temperature-monitoring.process-temperature.v1.dlq";
     public static final String QUEUE_ALERTING = "temperature-monitoring.alerting.v1.q";
     public static final String FANOUT_EXCHEAGE_NAME = "temperature-processing.temperature-received.v1.e";
     private final FanoutExchange exchange = ExchangeBuilder.fanoutExchange(FANOUT_EXCHEAGE_NAME).build();
@@ -23,7 +27,16 @@ public class RabbitMqConfig {
 
     @Bean
     public Queue queueProcessTemperature() {
-        return QueueBuilder.durable(QUEUE_PROCESS_TEMPERATURE).build();
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-dead-letter-exchange","");
+        args.put("x-dead-letter-routing-key",DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE);
+        return QueueBuilder.durable(QUEUE_PROCESS_TEMPERATURE).withArguments(args).build();
+    }
+
+    @Bean
+    public Queue deadLetterQueueProcessTemperature() {
+        // A deadLetterQueue é uma fila que fica com os erros apenas essa diferença
+        return QueueBuilder.durable(DEAD_LETTER_QUEUE_PROCESS_TEMPERATURE).build();
     }
 
     @Bean
