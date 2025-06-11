@@ -29,7 +29,6 @@ public class RabbitMqListener {
     @SneakyThrows
     public void handleProcessTemperature(@Payload TemperatureLogData temperatureLogData, @Headers Map<String, Object> headers){
         temperatureMonitoringService.processTemperatureReading(temperatureLogData);
-        Thread.sleep(Duration.ofSeconds(5));
     }
 
     @RabbitListener(queues = QUEUE_ALERTING, concurrency = "2-3")

@@ -24,6 +24,11 @@ public class TemperatureMonitoringService {
 
     @Transactional
     public void processTemperatureReading(TemperatureLogData temperatureLogData) {
+        log.info("processTemperatureReading");
+        if (temperatureLogData.getValue().equals(10.5)){
+            throw new RuntimeException("Erro forçado");
+        }
+
         var sensorId = new SensorId(temperatureLogData.getSensorId());
         sensorMonitoringRepository.findById(sensorId).ifPresentOrElse(
                 sensor -> {
